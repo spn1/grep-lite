@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::io::BufRead;
-use std::io::prelude::*;
 use clap::ArgAction;
 use regex::Regex;
 use clap::{Command, Arg, builder};
@@ -31,7 +30,7 @@ fn main() {
             Arg::new("input")
                 .short('i')
                 .help("File to search")
-                .required(true)
+                .required(false)
                 .action(ArgAction::Set)
                 .value_parser(builder::NonEmptyStringValueParser::new())
         )
@@ -40,9 +39,13 @@ fn main() {
     let pattern = args.get_one::<String>("pattern").unwrap();
     let re = Regex::new(pattern.as_str()).unwrap();
 
-    let input = args.get_one::<String>("input").unwrap();
-    let f = File::open(input).unwrap();
-    let reader = BufReader::new(f);
-
-    process_lines(reader, re);
+    if let Some(input) = args.get_one::<String>("input") {
+        let f = File::open(input).unwrap();
+        let reader = BufReader::new(f);
+        process_lines(reader, re);
+    } else {
+        let stdin = std::io::stdin();
+        let reader = stdin.lock();
+        process_lines(reader, re);
+    }
 }
