@@ -39,13 +39,16 @@ fn main() {
     let pattern = args.get_one::<String>("pattern").unwrap();
     let re = Regex::new(pattern.as_str()).unwrap();
 
-    if let Some(input) = args.get_one::<String>("input") {
-        let f = File::open(input).unwrap();
-        let reader = BufReader::new(f);
-        process_lines(reader, re);
-    } else {
-        let stdin = std::io::stdin();
-        let reader = stdin.lock();
-        process_lines(reader, re);
+    match args.get_one::<String>("input") {
+        Some(input) => {
+            let f = File::open(input).unwrap();
+            let reader = BufReader::new(f);
+            process_lines(reader, re);
+        },
+        None => {
+            let stdin = std::io::stdin();
+            let reader = stdin.lock();
+            process_lines(reader, re);
+        }
     }
 }
